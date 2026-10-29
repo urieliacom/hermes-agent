@@ -1,25 +1,9 @@
 # Dependabot configuration for hermes-agent.
 #
-# Deliberately scoped to github-actions only.
-#
-# We do NOT enable Dependabot for pip / npm / any source-dependency ecosystem
-# because we pin source dependencies exactly (uv.lock, package-lock.json) as
-# part of our supply-chain posture. Automatic version-bump PRs against those
-# pins would undermine the strategy — pins are moved deliberately, after
-# review, not on a schedule.
-#
-# github-actions is the exception: action pins (we use full commit SHAs per
-# supply-chain policy) must be updated when upstream actions publish
-# patches — usually themselves security fixes. Dependabot opens a PR with
-# the new SHA and release notes; we review and merge like any other PR.
-#
-# Security-update PRs for source dependencies (opened ONLY when a CVE is
-# published affecting a currently-pinned version) are enabled separately
-# via the repo's Dependabot security updates setting
-# (Settings → Code security → Dependabot → Dependabot security updates).
-# Those are CVE-only, not schedule-driven, and do not conflict with our
-# pinning strategy — they fire when a pinned version becomes known-bad,
-# which is exactly when we want to move the pin.
+# Weekly version-update PRs cover all Dependabot-supported dependency
+# ecosystems in this repository. Updates retain pins and require review;
+# this configuration does not enable automatic merging.
+# Dependabot security updates are enabled separately in repository settings.
 
 version: 2
 updates:
@@ -39,6 +23,102 @@ updates:
       # Batch routine action bumps into one PR per week to reduce noise.
       # Security updates still open individually and bypass grouping.
       actions-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "uv"
+    directories:
+      - "/"
+      - "/pm"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(python)"
+      include: "scope"
+    groups:
+      python-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "pip"
+    directory: "/optional-skills/finance/dcf-model"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(python)"
+      include: "scope"
+    groups:
+      requirements-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "npm"
+    directories:
+      # The root lockfile covers apps/*, ui-tui (including hermes-ink),
+      # web, and tests-js through npm workspaces.
+      - "/"
+      - "/website"
+      - "/scripts/whatsapp-bridge"
+      - "/plugins/platforms/photon/sidecar"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(npm)"
+      include: "scope"
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "cargo"
+    directory: "/apps/bootstrap-installer/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(rust)"
+      include: "scope"
+    groups:
+      rust-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "docker"
+    directories:
+      - "/"
+      - "/docker"
+      - "/scripts/termux"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+    groups:
+      docker-minor-patch:
         update-types:
           - "minor"
           - "patch"
